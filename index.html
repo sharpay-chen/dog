@@ -29,11 +29,39 @@
       min-height: 100vh;
     }
 
+    /* ── Language switcher ── */
+    .lang-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 14px 28px 0;
+      background: var(--surface);
+    }
+
+    .lang-btn {
+      background: transparent;
+      border: 1.5px solid #D4C5B0;
+      color: var(--text-light);
+      padding: 4px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: .8rem;
+      letter-spacing: 1px;
+      transition: all .2s;
+    }
+
+    .lang-btn:hover,
+    .lang-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
     /* ── Header ── */
     header {
       background-color: var(--surface);
       border-bottom: 2px solid #D4C5B0;
-      padding: 48px 24px 36px;
+      padding: 32px 24px 36px;
       text-align: center;
     }
 
@@ -107,10 +135,7 @@
       box-shadow: 0 10px 32px rgba(92,83,74,.14);
     }
 
-    /* colour strip per card */
-    .card-strip {
-      height: 6px;
-    }
+    .card-strip { height: 6px; }
     .card:nth-child(6n+1) .card-strip { background: var(--card-1); }
     .card:nth-child(6n+2) .card-strip { background: var(--card-2); }
     .card:nth-child(6n+3) .card-strip { background: var(--card-3); }
@@ -118,14 +143,6 @@
     .card:nth-child(6n+5) .card-strip { background: var(--card-5); }
     .card:nth-child(6n+0) .card-strip { background: var(--card-6); }
 
-    .card-img {
-      width: 100%;
-      height: 210px;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* emoji fallback image */
     .card-emoji {
       width: 100%;
       height: 210px;
@@ -144,11 +161,7 @@
       gap: 10px;
     }
 
-    .card-tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+    .card-tags { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .tag {
       font-size: .72rem;
@@ -184,7 +197,6 @@
       line-height: 1.7;
     }
 
-    /* traits bar */
     .traits { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 
     .trait-row { display: flex; align-items: center; gap: 10px; }
@@ -192,7 +204,7 @@
     .trait-label {
       font-size: .75rem;
       color: var(--text-light);
-      width: 52px;
+      width: 60px;
       flex-shrink: 0;
     }
 
@@ -211,7 +223,6 @@
       transition: width .6s ease;
     }
 
-    /* ── Footer ── */
     footer {
       text-align: center;
       padding: 28px;
@@ -224,187 +235,288 @@
 </head>
 <body>
 
-<header>
-  <div class="paw">🐾 🐾 🐾</div>
-  <h1>狗狗品種圖鑑</h1>
-  <p>探索各種可愛的犬種 · Dog Breed Encyclopedia</p>
-</header>
-
-<div class="filters">
-  <button class="filter-btn active" onclick="filterCards('all',this)">全部</button>
-  <button class="filter-btn" onclick="filterCards('小型',this)">小型犬</button>
-  <button class="filter-btn" onclick="filterCards('中型',this)">中型犬</button>
-  <button class="filter-btn" onclick="filterCards('大型',this)">大型犬</button>
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('zh',this)">中文</button>
+  <button class="lang-btn" onclick="setLang('en',this)">English</button>
+  <button class="lang-btn" onclick="setLang('ja',this)">日本語</button>
 </div>
 
+<header>
+  <div class="paw">🐾 🐾 🐾</div>
+  <h1 id="site-title">狗狗品種圖鑑</h1>
+  <p id="site-sub">探索各種可愛的犬種 · Dog Breed Encyclopedia</p>
+</header>
+
+<div class="filters" id="filters"></div>
 <div class="grid" id="grid"></div>
 
-<footer>🐶 &nbsp; 每一隻狗狗都值得被愛 &nbsp; 🐶</footer>
+<footer id="footer">🐶 &nbsp; 每一隻狗狗都值得被愛 &nbsp; 🐶</footer>
 
 <script>
+const i18n = {
+  zh: {
+    title: '狗狗品種圖鑑',
+    sub: '探索各種可愛的犬種 · Dog Breed Encyclopedia',
+    footer: '🐶 \u00a0 每一隻狗狗都值得被愛 \u00a0 🐶',
+    all: '全部', small: '小型犬', medium: '中型犬', large: '大型犬',
+    sizeLabel: { small: '小型', medium: '中型', large: '大型' },
+    traits: ['活潑', '親人', '訓練', '護衛'],
+    tagSuffix: '型',
+  },
+  en: {
+    title: 'Dog Breed Encyclopedia',
+    sub: 'Discover amazing dog breeds from around the world',
+    footer: '🐶 \u00a0 Every dog deserves to be loved \u00a0 🐶',
+    all: 'All', small: 'Small', medium: 'Medium', large: 'Large',
+    sizeLabel: { small: 'Small', medium: 'Medium', large: 'Large' },
+    traits: ['Energy', 'Friendly', 'Trainable', 'Guard'],
+    tagSuffix: '',
+  },
+  ja: {
+    title: '犬種図鑑',
+    sub: 'かわいい犬たちの世界を探索しよう',
+    footer: '🐶 \u00a0 すべての犬は愛される価値がある \u00a0 🐶',
+    all: 'すべて', small: '小型犬', medium: '中型犬', large: '大型犬',
+    sizeLabel: { small: '小型', medium: '中型', large: '大型' },
+    traits: ['活発', '友好的', '訓練性', '護衛'],
+    tagSuffix: '',
+  },
+};
+
 const dogs = [
   {
-    emoji: "🐩",
-    name: "貴賓犬",
-    eng: "Poodle",
-    size: "小型",
-    origin: "法國",
-    type: "陪伴犬",
-    desc: "聰明活潑，適應力強，幾乎不掉毛，是過敏體質飼主的首選。個性溫柔，學習能力極佳。",
-    traits: { 活潑: 90, 親人: 95, 訓練: 98, 護衛: 40 }
+    emoji: '🐩',
+    name: { zh: '貴賓犬', en: 'Poodle', ja: 'プードル' },
+    size: 'small',
+    origin: { zh: '法國', en: 'France', ja: 'フランス' },
+    type: { zh: '陪伴犬', en: 'Companion', ja: 'コンパニオン' },
+    desc: {
+      zh: '聰明活潑，適應力強，幾乎不掉毛，是過敏體質飼主的首選。個性溫柔，學習能力極佳。',
+      en: 'Highly intelligent and adaptable, Poodles barely shed, making them ideal for allergy-prone owners. Gentle and eager to learn.',
+      ja: '賢くて活発、適応力が高く、ほとんど毛が抜けないためアレルギー持ちの飼い主に人気。温かく学習能力に優れる。',
+    },
+    traits: [90, 95, 98, 40],
   },
   {
-    emoji: "🦮",
-    name: "黃金獵犬",
-    eng: "Golden Retriever",
-    size: "大型",
-    origin: "英國",
-    type: "家庭犬",
-    desc: "天生溫和友善，對人充滿愛心，是最受歡迎的家庭犬之一，也常作為導盲犬與治療犬。",
-    traits: { 活潑: 85, 親人: 99, 訓練: 90, 護衛: 55 }
+    emoji: '🦮',
+    name: { zh: '黃金獵犬', en: 'Golden Retriever', ja: 'ゴールデンレトリバー' },
+    size: 'large',
+    origin: { zh: '英國', en: 'UK', ja: 'イギリス' },
+    type: { zh: '家庭犬', en: 'Family Dog', ja: 'ファミリー犬' },
+    desc: {
+      zh: '天生溫和友善，對人充滿愛心，是最受歡迎的家庭犬之一，也常作為導盲犬與治療犬。',
+      en: 'Naturally gentle and loving, Golden Retrievers are one of the most popular family dogs and are widely used as guide and therapy dogs.',
+      ja: '生まれつき穏やかで愛情深く、人気No.1の家庭犬。盲導犬やセラピー犬としても広く活躍している。',
+    },
+    traits: [85, 99, 90, 55],
   },
   {
-    emoji: "🐕",
-    name: "柴犬",
-    eng: "Shiba Inu",
-    size: "小型",
-    origin: "日本",
-    type: "獵犬",
-    desc: "獨立自主，忠誠勇敢，擁有標誌性的捲尾與狐狸臉。乾淨整潔，個性像貓一樣獨特。",
-    traits: { 活潑: 75, 親人: 65, 訓練: 60, 護衛: 80 }
+    emoji: '🐕',
+    name: { zh: '柴犬', en: 'Shiba Inu', ja: '柴犬' },
+    size: 'small',
+    origin: { zh: '日本', en: 'Japan', ja: '日本' },
+    type: { zh: '獵犬', en: 'Hunting Dog', ja: '猟犬' },
+    desc: {
+      zh: '獨立自主，忠誠勇敢，擁有標誌性的捲尾與狐狸臉。乾淨整潔，個性像貓一樣獨特。',
+      en: 'Independent, loyal and bold with a signature curled tail and fox-like face. Clean and cat-like in personality.',
+      ja: '独立心が強く、忠実で勇敢。巻き尾とキツネのような顔が特徴。清潔好きで猫のような個性を持つ。',
+    },
+    traits: [75, 65, 60, 80],
   },
   {
-    emoji: "🐕‍🦺",
-    name: "邊境牧羊犬",
-    eng: "Border Collie",
-    size: "中型",
-    origin: "英國",
-    type: "牧羊犬",
-    desc: "被認為是智商最高的犬種，精力旺盛、工作狂熱，需要大量運動與心理刺激。",
-    traits: { 活潑: 99, 親人: 80, 訓練: 99, 護衛: 70 }
+    emoji: '🐕‍🦺',
+    name: { zh: '邊境牧羊犬', en: 'Border Collie', ja: 'ボーダーコリー' },
+    size: 'medium',
+    origin: { zh: '英國', en: 'UK', ja: 'イギリス' },
+    type: { zh: '牧羊犬', en: 'Herding Dog', ja: '牧羊犬' },
+    desc: {
+      zh: '被認為是智商最高的犬種，精力旺盛、工作狂熱，需要大量運動與心理刺激。',
+      en: 'Widely considered the most intelligent dog breed. Extremely energetic and work-driven, requiring plenty of exercise and mental stimulation.',
+      ja: '最も知能が高い犬種とされる。エネルギッシュで仕事熱心、大量の運動と頭の刺激が必要。',
+    },
+    traits: [99, 80, 99, 70],
   },
   {
-    emoji: "🐶",
-    name: "法國鬥牛犬",
-    eng: "French Bulldog",
-    size: "小型",
-    origin: "法國",
-    type: "陪伴犬",
-    desc: "招牌蝙蝠耳搭配圓滾滾的身材，個性溫和幽默，適合公寓生活，深受都市族群喜愛。",
-    traits: { 活潑: 55, 親人: 90, 訓練: 65, 護衛: 45 }
+    emoji: '🐶',
+    name: { zh: '法國鬥牛犬', en: 'French Bulldog', ja: 'フレンチブルドッグ' },
+    size: 'small',
+    origin: { zh: '法國', en: 'France', ja: 'フランス' },
+    type: { zh: '陪伴犬', en: 'Companion', ja: 'コンパニオン' },
+    desc: {
+      zh: '招牌蝙蝠耳搭配圓滾滾的身材，個性溫和幽默，適合公寓生活，深受都市族群喜愛。',
+      en: 'Signature bat ears and a compact body. Easygoing and playful, perfectly suited for apartment life and urban owners.',
+      ja: 'コウモリ耳とずんぐりした体型が特徴。穏やかでユーモアがあり、アパート暮らしに最適。',
+    },
+    traits: [55, 90, 65, 45],
   },
   {
-    emoji: "🐺",
-    name: "德國牧羊犬",
-    eng: "German Shepherd",
-    size: "大型",
-    origin: "德國",
-    type: "工作犬",
-    desc: "勇敢忠誠，高度服從，廣泛用於警察、軍事及搜救工作。對家人充滿保護慾。",
-    traits: { 活潑: 88, 親人: 82, 訓練: 97, 護衛: 99 }
+    emoji: '🐺',
+    name: { zh: '德國牧羊犬', en: 'German Shepherd', ja: 'ジャーマンシェパード' },
+    size: 'large',
+    origin: { zh: '德國', en: 'Germany', ja: 'ドイツ' },
+    type: { zh: '工作犬', en: 'Working Dog', ja: '作業犬' },
+    desc: {
+      zh: '勇敢忠誠，高度服從，廣泛用於警察、軍事及搜救工作。對家人充滿保護慾。',
+      en: 'Brave, loyal and highly obedient. Widely used in police, military and search-and-rescue operations. Deeply protective of family.',
+      ja: '勇敢で忠実、服従性が高い。警察・軍・捜索救助での活躍が広く、家族への保護意識が強い。',
+    },
+    traits: [88, 82, 97, 99],
   },
   {
-    emoji: "🐕",
-    name: "薩摩耶犬",
-    eng: "Samoyed",
-    size: "大型",
-    origin: "俄羅斯",
-    type: "雪橇犬",
-    desc: "純白蓬鬆的毛髮搭配永遠上揚的嘴角，有「微笑天使」之稱。個性開朗、熱愛人群。",
-    traits: { 活潑: 85, 親人: 92, 訓練: 70, 護衛: 50 }
+    emoji: '🐕',
+    name: { zh: '薩摩耶犬', en: 'Samoyed', ja: 'サモエド' },
+    size: 'large',
+    origin: { zh: '俄羅斯', en: 'Russia', ja: 'ロシア' },
+    type: { zh: '雪橇犬', en: 'Sled Dog', ja: '橇引き犬' },
+    desc: {
+      zh: '純白蓬鬆的毛髮搭配永遠上揚的嘴角，有「微笑天使」之稱。個性開朗、熱愛人群。',
+      en: 'Fluffy white coat and a perpetual smile earn it the nickname "Smiling Angel". Cheerful and people-loving.',
+      ja: '純白のふわふわな毛と常に微笑んでいるような口元から「微笑む天使」と呼ばれる。明るく人好き。',
+    },
+    traits: [85, 92, 70, 50],
   },
   {
-    emoji: "🐩",
-    name: "馬爾濟斯",
-    eng: "Maltese",
-    size: "小型",
-    origin: "地中海",
-    type: "陪伴犬",
-    desc: "雪白飄逸的長毛是最大特色，溫柔黏人，適合作為室內陪伴犬，深受老年人喜愛。",
-    traits: { 活潑: 60, 親人: 95, 訓練: 68, 護衛: 30 }
+    emoji: '🐩',
+    name: { zh: '馬爾濟斯', en: 'Maltese', ja: 'マルチーズ' },
+    size: 'small',
+    origin: { zh: '地中海', en: 'Mediterranean', ja: '地中海' },
+    type: { zh: '陪伴犬', en: 'Companion', ja: 'コンパニオン' },
+    desc: {
+      zh: '雪白飄逸的長毛是最大特色，溫柔黏人，適合作為室內陪伴犬，深受老年人喜愛。',
+      en: 'Known for its silky white coat, the Maltese is gentle and affectionate — an ideal indoor companion, especially for seniors.',
+      ja: '雪白の長毛が最大の特徴。温かく甘えん坊で、室内の伴侣犬として最適。高齢者にも人気。',
+    },
+    traits: [60, 95, 68, 30],
   },
   {
-    emoji: "🦊",
-    name: "博美犬",
-    eng: "Pomeranian",
-    size: "小型",
-    origin: "德國",
-    type: "陪伴犬",
-    desc: "嬌小玲瓏卻個性十足，活力充沛又勇敢，擁有濃密雙層毛與狐狸般的尖臉，極具魅力。",
-    traits: { 活潑: 80, 親人: 82, 訓練: 65, 護衛: 55 }
+    emoji: '🦊',
+    name: { zh: '博美犬', en: 'Pomeranian', ja: 'ポメラニアン' },
+    size: 'small',
+    origin: { zh: '德國', en: 'Germany', ja: 'ドイツ' },
+    type: { zh: '陪伴犬', en: 'Companion', ja: 'コンパニオン' },
+    desc: {
+      zh: '嬌小玲瓏卻個性十足，活力充沛又勇敢，擁有濃密雙層毛與狐狸般的尖臉，極具魅力。',
+      en: 'Tiny but bold and fearless, with a thick double coat and a foxy face full of personality.',
+      ja: '小さいが大胆で恐れ知らず。ふさふさの二重毛皮とキツネのような顔が魅力的。',
+    },
+    traits: [80, 82, 65, 55],
   },
   {
-    emoji: "🐕",
-    name: "拉布拉多",
-    eng: "Labrador Retriever",
-    size: "大型",
-    origin: "加拿大",
-    type: "工作犬",
-    desc: "全球最受歡迎的犬種之一，個性溫和、友善好動，常被訓練為導盲犬與搜救犬。",
-    traits: { 活潑: 90, 親人: 97, 訓練: 93, 護衛: 60 }
+    emoji: '🐕',
+    name: { zh: '拉布拉多', en: 'Labrador Retriever', ja: 'ラブラドールレトリバー' },
+    size: 'large',
+    origin: { zh: '加拿大', en: 'Canada', ja: 'カナダ' },
+    type: { zh: '工作犬', en: 'Working Dog', ja: '作業犬' },
+    desc: {
+      zh: '全球最受歡迎的犬種之一，個性溫和、友善好動，常被訓練為導盲犬與搜救犬。',
+      en: 'One of the world\'s most popular breeds. Gentle, friendly, and active — widely trained as guide and rescue dogs.',
+      ja: '世界で最も人気のある犬種の一つ。穏やかで友好的、活動的で盲導犬・救助犬として活躍。',
+    },
+    traits: [90, 97, 93, 60],
   },
   {
-    emoji: "🐶",
-    name: "哈士奇",
-    eng: "Siberian Husky",
-    size: "中型",
-    origin: "西伯利亞",
-    type: "雪橇犬",
-    desc: "雙色眼睛與面具紋路是標誌，個性獨立調皮，活力超群，有時像貓一樣行事出人意料。",
-    traits: { 活潑: 95, 親人: 78, 訓練: 55, 護衛: 45 }
+    emoji: '🐶',
+    name: { zh: '哈士奇', en: 'Siberian Husky', ja: 'シベリアンハスキー' },
+    size: 'medium',
+    origin: { zh: '西伯利亞', en: 'Siberia', ja: 'シベリア' },
+    type: { zh: '雪橇犬', en: 'Sled Dog', ja: '橇引き犬' },
+    desc: {
+      zh: '雙色眼睛與面具紋路是標誌，個性獨立調皮，活力超群，有時像貓一樣行事出人意料。',
+      en: 'Striking bi-colored eyes and mask markings. Independent and mischievous with boundless energy — unpredictable like a cat.',
+      ja: '異色の目とマスク模様が特徴。独立心が強くいたずら好き、エネルギーにあふれ猫のように予想外の行動をとる。',
+    },
+    traits: [95, 78, 55, 45],
   },
   {
-    emoji: "🐕",
-    name: "柯基犬",
-    eng: "Corgi",
-    size: "小型",
-    origin: "威爾斯",
-    type: "牧羊犬",
-    desc: "短腿大耳與圓潤翹臀讓人一見難忘，個性聰明活潑，原為牧羊工作犬，現為英國王室最愛。",
-    traits: { 活潑: 82, 親人: 88, 訓練: 85, 護衛: 65 }
+    emoji: '🐕',
+    name: { zh: '柯基犬', en: 'Corgi', ja: 'コーギー' },
+    size: 'small',
+    origin: { zh: '威爾斯', en: 'Wales', ja: 'ウェールズ' },
+    type: { zh: '牧羊犬', en: 'Herding Dog', ja: '牧羊犬' },
+    desc: {
+      zh: '短腿大耳與圓潤翹臀讓人一見難忘，個性聰明活潑，原為牧羊工作犬，現為英國王室最愛。',
+      en: 'Short legs, big ears, and a round fluffy bottom — unforgettable. Smart and lively, originally a herding dog, now beloved by British royalty.',
+      ja: '短い足、大きな耳、丸いお尻が印象的。賢くて活発、元は牧羊犬でイギリス王室でも愛されている。',
+    },
+    traits: [82, 88, 85, 65],
   },
 ];
 
-const grid = document.getElementById('grid');
+const sizeMap = { small: 'small', medium: 'medium', large: 'large' };
+let currentLang = 'zh';
+let currentFilter = 'all';
 
-function buildCard(dog) {
-  const maxVal = 100;
-  const traitRows = Object.entries(dog.traits).map(([k,v]) =>
-    `<div class="trait-row">
-      <div class="trait-label">${k}</div>
-      <div class="trait-bar"><div class="trait-fill" style="width:${v}%"></div></div>
-    </div>`
-  ).join('');
-
-  return `
-    <div class="card" data-size="${dog.size}">
-      <div class="card-strip"></div>
-      <div class="card-emoji">${dog.emoji}</div>
-      <div class="card-body">
-        <div class="card-tags">
-          <span class="tag tag-size">${dog.size}型</span>
-          <span class="tag tag-origin">${dog.origin}</span>
-          <span class="tag tag-type">${dog.type}</span>
-        </div>
-        <div class="card-name">
-          ${dog.name}
-          <span>${dog.eng}</span>
-        </div>
-        <div class="card-desc">${dog.desc}</div>
-        <div class="traits">${traitRows}</div>
-      </div>
-    </div>`;
+function setLang(lang, btn) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.documentElement.lang = lang === 'zh' ? 'zh-TW' : lang === 'ja' ? 'ja' : 'en';
+  const t = i18n[lang];
+  document.getElementById('site-title').textContent = t.title;
+  document.getElementById('site-sub').textContent = t.sub;
+  document.getElementById('footer').innerHTML = t.footer;
+  renderFilters();
+  renderGrid();
 }
 
-dogs.forEach(d => grid.insertAdjacentHTML('beforeend', buildCard(d)));
+function renderFilters() {
+  const t = i18n[currentLang];
+  const sizes = [
+    { key: 'all',    label: t.all },
+    { key: 'small',  label: t.small },
+    { key: 'medium', label: t.medium },
+    { key: 'large',  label: t.large },
+  ];
+  document.getElementById('filters').innerHTML = sizes.map(s =>
+    `<button class="filter-btn${currentFilter === s.key ? ' active' : ''}"
+      onclick="filterCards('${s.key}',this)">${s.label}</button>`
+  ).join('');
+}
+
+function renderGrid() {
+  const t = i18n[currentLang];
+  const grid = document.getElementById('grid');
+  grid.innerHTML = dogs.map(dog => {
+    const sizeLabel = t.sizeLabel[dog.size];
+    const traitRows = t.traits.map((label, i) =>
+      `<div class="trait-row">
+        <div class="trait-label">${label}</div>
+        <div class="trait-bar"><div class="trait-fill" style="width:${dog.traits[i]}%"></div></div>
+      </div>`
+    ).join('');
+    const visible = currentFilter === 'all' || currentFilter === dog.size;
+    return `
+      <div class="card" data-size="${dog.size}" style="${visible ? '' : 'display:none'}">
+        <div class="card-strip"></div>
+        <div class="card-emoji">${dog.emoji}</div>
+        <div class="card-body">
+          <div class="card-tags">
+            <span class="tag tag-size">${sizeLabel}${t.tagSuffix}</span>
+            <span class="tag tag-origin">${dog.origin[currentLang]}</span>
+            <span class="tag tag-type">${dog.type[currentLang]}</span>
+          </div>
+          <div class="card-name">
+            ${dog.name[currentLang]}
+            <span>${currentLang !== 'en' ? dog.name.en : ''}</span>
+          </div>
+          <div class="card-desc">${dog.desc[currentLang]}</div>
+          <div class="traits">${traitRows}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
 
 function filterCards(size, btn) {
+  currentFilter = size;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('.card').forEach(card => {
     card.style.display = (size === 'all' || card.dataset.size === size) ? '' : 'none';
   });
 }
+
+renderFilters();
+renderGrid();
 </script>
 </body>
 </html>
