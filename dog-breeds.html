@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>狗狗品種圖鑑</title>
+  <style>
+    :root {
+      --bg:        #EDE5D8;
+      --surface:   #F5F0E8;
+      --card-1:    #C4A4A4;
+      --card-2:    #9CAF9C;
+      --card-3:    #9AAAB4;
+      --card-4:    #C4967A;
+      --card-5:    #B5A8C4;
+      --card-6:    #A8B8A8;
+      --text-dark: #5C534A;
+      --text-mid:  #7A6F65;
+      --text-light:#A89D93;
+      --accent:    #C4967A;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Georgia', 'Noto Serif TC', serif;
+      background-color: var(--bg);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background-color: var(--surface);
+      border-bottom: 2px solid #D4C5B0;
+      padding: 48px 24px 36px;
+      text-align: center;
+    }
+
+    header .paw { font-size: 2rem; letter-spacing: 8px; opacity: .55; }
+
+    header h1 {
+      font-size: 2.6rem;
+      font-weight: normal;
+      color: var(--text-dark);
+      margin: 12px 0 8px;
+      letter-spacing: 4px;
+    }
+
+    header p {
+      font-size: 1rem;
+      color: var(--text-light);
+      letter-spacing: 2px;
+    }
+
+    /* ── Filter bar ── */
+    .filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 32px 24px 16px;
+    }
+
+    .filter-btn {
+      background: var(--surface);
+      border: 1.5px solid #D4C5B0;
+      color: var(--text-mid);
+      padding: 8px 22px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: .9rem;
+      letter-spacing: 1px;
+      transition: all .25s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Grid ── */
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 24px 64px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 28px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(92,83,74,.08);
+      transition: transform .3s, box-shadow .3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 32px rgba(92,83,74,.14);
+    }
+
+    /* colour strip per card */
+    .card-strip {
+      height: 6px;
+    }
+    .card:nth-child(6n+1) .card-strip { background: var(--card-1); }
+    .card:nth-child(6n+2) .card-strip { background: var(--card-2); }
+    .card:nth-child(6n+3) .card-strip { background: var(--card-3); }
+    .card:nth-child(6n+4) .card-strip { background: var(--card-4); }
+    .card:nth-child(6n+5) .card-strip { background: var(--card-5); }
+    .card:nth-child(6n+0) .card-strip { background: var(--card-6); }
+
+    .card-img {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* emoji fallback image */
+    .card-emoji {
+      width: 100%;
+      height: 210px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 6rem;
+      background: linear-gradient(135deg, #EDE5D8 60%, #D4C5B0);
+    }
+
+    .card-body {
+      padding: 22px 24px 26px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: .72rem;
+      letter-spacing: 1px;
+      padding: 3px 12px;
+      border-radius: 999px;
+      border: 1px solid currentColor;
+      opacity: .75;
+    }
+
+    .tag-size   { color: #9CAF9C; }
+    .tag-origin { color: #9AAAB4; }
+    .tag-type   { color: #C4A4A4; }
+
+    .card-name {
+      font-size: 1.35rem;
+      font-weight: normal;
+      color: var(--text-dark);
+      letter-spacing: 1px;
+    }
+
+    .card-name span {
+      display: block;
+      font-size: .8rem;
+      color: var(--text-light);
+      letter-spacing: 2px;
+      margin-top: 2px;
+    }
+
+    .card-desc {
+      font-size: .9rem;
+      color: var(--text-mid);
+      line-height: 1.7;
+    }
+
+    /* traits bar */
+    .traits { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+
+    .trait-row { display: flex; align-items: center; gap: 10px; }
+
+    .trait-label {
+      font-size: .75rem;
+      color: var(--text-light);
+      width: 52px;
+      flex-shrink: 0;
+    }
+
+    .trait-bar {
+      flex: 1;
+      height: 5px;
+      background: #DDD7CE;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .trait-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+      transition: width .6s ease;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: var(--text-light);
+      font-size: .82rem;
+      letter-spacing: 1px;
+      border-top: 1px solid #D4C5B0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="paw">🐾 🐾 🐾</div>
+  <h1>狗狗品種圖鑑</h1>
+  <p>探索各種可愛的犬種 · Dog Breed Encyclopedia</p>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterCards('all',this)">全部</button>
+  <button class="filter-btn" onclick="filterCards('小型',this)">小型犬</button>
+  <button class="filter-btn" onclick="filterCards('中型',this)">中型犬</button>
+  <button class="filter-btn" onclick="filterCards('大型',this)">大型犬</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>🐶 &nbsp; 每一隻狗狗都值得被愛 &nbsp; 🐶</footer>
+
+<script>
+const dogs = [
+  {
+    emoji: "🐩",
+    name: "貴賓犬",
+    eng: "Poodle",
+    size: "小型",
+    origin: "法國",
+    type: "陪伴犬",
+    desc: "聰明活潑，適應力強，幾乎不掉毛，是過敏體質飼主的首選。個性溫柔，學習能力極佳。",
+    traits: { 活潑: 90, 親人: 95, 訓練: 98, 護衛: 40 }
+  },
+  {
+    emoji: "🦮",
+    name: "黃金獵犬",
+    eng: "Golden Retriever",
+    size: "大型",
+    origin: "英國",
+    type: "家庭犬",
+    desc: "天生溫和友善，對人充滿愛心，是最受歡迎的家庭犬之一，也常作為導盲犬與治療犬。",
+    traits: { 活潑: 85, 親人: 99, 訓練: 90, 護衛: 55 }
+  },
+  {
+    emoji: "🐕",
+    name: "柴犬",
+    eng: "Shiba Inu",
+    size: "小型",
+    origin: "日本",
+    type: "獵犬",
+    desc: "獨立自主，忠誠勇敢，擁有標誌性的捲尾與狐狸臉。乾淨整潔，個性像貓一樣獨特。",
+    traits: { 活潑: 75, 親人: 65, 訓練: 60, 護衛: 80 }
+  },
+  {
+    emoji: "🐕‍🦺",
+    name: "邊境牧羊犬",
+    eng: "Border Collie",
+    size: "中型",
+    origin: "英國",
+    type: "牧羊犬",
+    desc: "被認為是智商最高的犬種，精力旺盛、工作狂熱，需要大量運動與心理刺激。",
+    traits: { 活潑: 99, 親人: 80, 訓練: 99, 護衛: 70 }
+  },
+  {
+    emoji: "🐶",
+    name: "法國鬥牛犬",
+    eng: "French Bulldog",
+    size: "小型",
+    origin: "法國",
+    type: "陪伴犬",
+    desc: "招牌蝙蝠耳搭配圓滾滾的身材，個性溫和幽默，適合公寓生活，深受都市族群喜愛。",
+    traits: { 活潑: 55, 親人: 90, 訓練: 65, 護衛: 45 }
+  },
+  {
+    emoji: "🐺",
+    name: "德國牧羊犬",
+    eng: "German Shepherd",
+    size: "大型",
+    origin: "德國",
+    type: "工作犬",
+    desc: "勇敢忠誠，高度服從，廣泛用於警察、軍事及搜救工作。對家人充滿保護慾。",
+    traits: { 活潑: 88, 親人: 82, 訓練: 97, 護衛: 99 }
+  },
+  {
+    emoji: "🐕",
+    name: "薩摩耶犬",
+    eng: "Samoyed",
+    size: "大型",
+    origin: "俄羅斯",
+    type: "雪橇犬",
+    desc: "純白蓬鬆的毛髮搭配永遠上揚的嘴角，有「微笑天使」之稱。個性開朗、熱愛人群。",
+    traits: { 活潑: 85, 親人: 92, 訓練: 70, 護衛: 50 }
+  },
+  {
+    emoji: "🐩",
+    name: "馬爾濟斯",
+    eng: "Maltese",
+    size: "小型",
+    origin: "地中海",
+    type: "陪伴犬",
+    desc: "雪白飄逸的長毛是最大特色，溫柔黏人，適合作為室內陪伴犬，深受老年人喜愛。",
+    traits: { 活潑: 60, 親人: 95, 訓練: 68, 護衛: 30 }
+  },
+  {
+    emoji: "🦊",
+    name: "博美犬",
+    eng: "Pomeranian",
+    size: "小型",
+    origin: "德國",
+    type: "陪伴犬",
+    desc: "嬌小玲瓏卻個性十足，活力充沛又勇敢，擁有濃密雙層毛與狐狸般的尖臉，極具魅力。",
+    traits: { 活潑: 80, 親人: 82, 訓練: 65, 護衛: 55 }
+  },
+  {
+    emoji: "🐕",
+    name: "拉布拉多",
+    eng: "Labrador Retriever",
+    size: "大型",
+    origin: "加拿大",
+    type: "工作犬",
+    desc: "全球最受歡迎的犬種之一，個性溫和、友善好動，常被訓練為導盲犬與搜救犬。",
+    traits: { 活潑: 90, 親人: 97, 訓練: 93, 護衛: 60 }
+  },
+  {
+    emoji: "🐶",
+    name: "哈士奇",
+    eng: "Siberian Husky",
+    size: "中型",
+    origin: "西伯利亞",
+    type: "雪橇犬",
+    desc: "雙色眼睛與面具紋路是標誌，個性獨立調皮，活力超群，有時像貓一樣行事出人意料。",
+    traits: { 活潑: 95, 親人: 78, 訓練: 55, 護衛: 45 }
+  },
+  {
+    emoji: "🐕",
+    name: "柯基犬",
+    eng: "Corgi",
+    size: "小型",
+    origin: "威爾斯",
+    type: "牧羊犬",
+    desc: "短腿大耳與圓潤翹臀讓人一見難忘，個性聰明活潑，原為牧羊工作犬，現為英國王室最愛。",
+    traits: { 活潑: 82, 親人: 88, 訓練: 85, 護衛: 65 }
+  },
+];
+
+const grid = document.getElementById('grid');
+
+function buildCard(dog) {
+  const maxVal = 100;
+  const traitRows = Object.entries(dog.traits).map(([k,v]) =>
+    `<div class="trait-row">
+      <div class="trait-label">${k}</div>
+      <div class="trait-bar"><div class="trait-fill" style="width:${v}%"></div></div>
+    </div>`
+  ).join('');
+
+  return `
+    <div class="card" data-size="${dog.size}">
+      <div class="card-strip"></div>
+      <div class="card-emoji">${dog.emoji}</div>
+      <div class="card-body">
+        <div class="card-tags">
+          <span class="tag tag-size">${dog.size}型</span>
+          <span class="tag tag-origin">${dog.origin}</span>
+          <span class="tag tag-type">${dog.type}</span>
+        </div>
+        <div class="card-name">
+          ${dog.name}
+          <span>${dog.eng}</span>
+        </div>
+        <div class="card-desc">${dog.desc}</div>
+        <div class="traits">${traitRows}</div>
+      </div>
+    </div>`;
+}
+
+dogs.forEach(d => grid.insertAdjacentHTML('beforeend', buildCard(d)));
+
+function filterCards(size, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.display = (size === 'all' || card.dataset.size === size) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
